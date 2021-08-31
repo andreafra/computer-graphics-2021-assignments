@@ -130,15 +130,16 @@ function buildGeometry() {
 	
 	const radius_C = 2;
 	const height_C = 5;
-	const SLICES = 6
+	const SLICES = 24
 	const SLICE = Math.PI * 2 / SLICES
 
 	// Generate center vertices
 	vert4.push([0, 0, 0, 0, -1, 0]) // 0 = center bottom
 	vert4.push([0, height_C, 0, 0, 1, 0]) // 1 = center top
 
+	let alpha = 0;
 	// Generate side triangles
-	for (let alpha = 0; alpha <= Math.PI*2; alpha += SLICE) {
+	for (let a = 0; a <= SLICES; a++) {
 		let _x = Math.cos(alpha);
 		let _z = Math.sin(alpha);
 
@@ -148,6 +149,8 @@ function buildGeometry() {
 			[_x * radius_C, 0, _z * radius_C, _x, 0, _z], // 2 : low, curr
 			[_x * radius_C, height_C, _z * radius_C, _x, 0, _z], // 3 : high, curr
 		)
+
+		alpha += SLICE;
 	}
  
 	// Make indices
@@ -163,33 +166,61 @@ function buildGeometry() {
 	addMesh(vert4, ind4, color4);
 
 	// Draws a Sphere --- To do for the assignment.
+
 	var vert5 = [];
 	var ind5 = [];
 	var color5 = [1.0, 0.0, 0.0];
 
 	const radius_S = 2;
 
+	alpha = -Math.PI / 2;
+
+	for (let a = 0; a < SLICES/2; a++) { 
+		if (!(alpha === -Math.PI/2 || alpha === Math.PI/2)) {			
+			let beta = 0
+			for(let b = 0; b < SLICES; b++) { 
+				let _y = Math.sin(alpha);
+				let _x = Math.cos(beta) * Math.cos(alpha);
+				let _z = Math.sin(beta) * Math.cos(alpha);
+
+				console.log([_x, _y, _z]);
+				vert5.push([_x * radius_S, _y * radius_S, _z * radius_S, _x, _y, _z])
+
+				beta += SLICE;
+			}
+		}
+		alpha += SLICE;
+
+	}
+
 	vert5.push([0, -radius_S, 0, 0, -1, 0]) // 0 : center bottom
 	vert5.push([0, radius_S, 0, 0, 1, 0]) // 1 : center top
 
-	for (let alpha = SLICE; alpha <= Math.PI - SLICE; alpha += SLICE) {
-		for(let beta = 0; beta <= Math.PI*2; beta += SLICE) {
-			let _y = Math.sin(alpha - Math.PI/2);
-			let _x = Math.cos(beta) * Math.cos(alpha);
-			let _z = Math.sin(beta) * Math.cos(alpha);
-			console.log([_x, _y, _z]);
-			vert5.push(_x * radius_S, _y * radius_S, _z * radius_S, _x, _y, _z)
+	for (let i = 0; i < vert5.length - (2 + SLICES); i++) {
+		if (i !== 0 && i % SLICES === SLICES - 1) {
+			ind5.push(
+				i, i + 1, i + 1 - SLICES,
+				i, i + SLICES, i + 1
+			)
+		} else {
+			ind5.push(
+				i, i + SLICES + 1, i + 1,
+				i, i + SLICES, i + SLICES + 1,
+			)
 		}
 	}
-	
 
-
-	let OFFSET = SLICES + 1
-	for (let i = 2; i < vert5.length - 2; i += 2) {
-		ind5.push(
-			i, i + 1, i + OFFSET,
-			i + 1, i + OFFSET + 1, i + OFFSET,
-		)
+	let botCenterIdx = vert5.length - 2;
+	let topCenterIdx = vert5.length - 1;
+	let topStart = vert5.length - 2 - SLICES;
+	for (i = 0; i < SLICES; i++) {
+		if (i !== SLICES - 1) {
+			ind5.push(botCenterIdx, i, i + 1);
+			ind5.push(topCenterIdx, topStart + i + 1, topStart + i);
+		} else {
+			ind5.push(botCenterIdx, i, 0);
+			ind5.push(topCenterIdx, topStart, topStart + i);
+		}
 	}
 
 	addMesh(vert5, ind5, color5);
