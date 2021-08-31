@@ -91,6 +91,19 @@ function buildGeometry() {
 			- (derivT[2] * derivS[0] - derivT[0] * derivS[2]),
 			- (derivT[0] * derivS[1] - derivT[1] * derivS[0])
 		]
+
+		// normalize vector array
+		let mag = Math.sqrt(
+			Math.pow(cross[0], 2) +
+			Math.pow(cross[1], 2) +
+			Math.pow(cross[2], 2)
+		)
+		let normVec = [
+			cross[0] / mag,
+			cross[1] / mag,
+			cross[2] / mag
+		]
+
 		return cross
 	}
 
@@ -175,6 +188,7 @@ function buildGeometry() {
 
 	alpha = -Math.PI / 2;
 
+	// Make vertices
 	for (let a = 0; a < SLICES/2; a++) { 
 		if (!(alpha === -Math.PI/2 || alpha === Math.PI/2)) {			
 			let beta = 0
@@ -196,6 +210,7 @@ function buildGeometry() {
 	vert5.push([0, -radius_S, 0, 0, -1, 0]) // 0 : center bottom
 	vert5.push([0, radius_S, 0, 0, 1, 0]) // 1 : center top
 
+	// Make indices for the sphere except top and bottom triangles
 	for (let i = 0; i < vert5.length - (2 + SLICES); i++) {
 		if (i !== 0 && i % SLICES === SLICES - 1) {
 			ind5.push(
@@ -210,6 +225,7 @@ function buildGeometry() {
 		}
 	}
 
+	// Make indices for top and bottom parts
 	let botCenterIdx = vert5.length - 2;
 	let topCenterIdx = vert5.length - 1;
 	let topStart = vert5.length - 2 - SLICES;
